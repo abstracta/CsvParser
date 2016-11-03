@@ -18,12 +18,21 @@ import java.util.Scanner;
  */
 public class CsvParser {
     
-    public static Object[][] generateObjectMatrixFromCsv(String path,boolean ignoreFirstRow,boolean ignoreFirstColumn) throws FileNotFoundException{
+    /**
+     *
+     * @param path Specifies the CSV file location.
+     * @param ignoreFirstRow If true, ignores the first row of the CSV file.
+     * @param ignoreFirstColumn If false, ignores the first row of the CSV file.
+     * @param delimiter Specifies the String with which the CSV will be split.
+     * @return Returns a Object[][], which contains every row in the CSV file.
+     * @throws FileNotFoundException If the CSV file is not found in the specified path, a FileNotFoundException will be thrown.
+     */
+    public static Object[][] generateObjectMatrixFromCsv(String path,boolean ignoreFirstRow,boolean ignoreFirstColumn,String delimiter) throws FileNotFoundException{
         Scanner scanner = new Scanner(new File(path));
         if (!scanner.hasNext()) {
             return null;
         }
-        scanner.useDelimiter(",");
+        scanner.useDelimiter(delimiter);
         if (ignoreFirstRow) {
             scanner.nextLine();            
         }        
@@ -31,7 +40,7 @@ public class CsvParser {
         ArrayList<Object[]> list=new ArrayList<>();
         // Iterate the csv and add data to the list
         while(scanner.hasNext()){
-            String[] parameters=scanner.nextLine().split(",");
+            String[] parameters=scanner.nextLine().split(delimiter);
             if (ignoreFirstColumn) {
                 String[] newParameters=new String[parameters.length-1];
                 System.arraycopy(parameters, 1, newParameters,0,newParameters.length);
