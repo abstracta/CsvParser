@@ -23,7 +23,7 @@ public class CsvParser {
      * @param path Specifies the CSV file location.
      * @param ignoreFirstRow If true, ignores the first row of the CSV file.
      * @param ignoreFirstColumn If false, ignores the first row of the CSV file.
-     * @param delimiter Specifies the String with which the CSV will be split.
+     * @param delimiter Specifies the String with which the CSV will be split. Must be null if no delimiter needed.
      * @return Returns a Object[][], which contains every row in the CSV file.
      * @throws FileNotFoundException If the CSV file is not found in the specified path, a FileNotFoundException will be thrown.
      * @throws csv.parser.DelimiterNotFoundException If one line of the file does not contain the given delimiter, a DelimiterNotFoundException will be thrown.
@@ -34,37 +34,47 @@ public class CsvParser {
         if (!scanner.hasNext()) {
             return null;
         }
-        scanner.useDelimiter(delimiter);
+        if (delimiter!=null) {
+            scanner.useDelimiter(delimiter);            
+        }
         if (ignoreFirstRow) {
-            String firstLine=scanner.nextLine();          
-            verifyLineContainsDelimiter(firstLine,delimiter,lineNumber);
+            String firstLine=scanner.nextLine();   
+            if (delimiter!=null) {
+                verifyLineContainsDelimiter(firstLine,delimiter,lineNumber);                
+            }
         }        
         
-        ArrayList<Object[]> list=new ArrayList<>();
+        ArrayList<Object[]> linesList=new ArrayList<>();
         // Iterate the csv and add data to the list
         while(scanner.hasNext()){
             String line=scanner.nextLine();
             lineNumber++;
             
-            // Verify that the delimiter exists in the line.
-            verifyLineContainsDelimiter(line,delimiter,lineNumber);
-            String[] parameters=line.split(delimiter);
-            
-            if (ignoreFirstColumn) {
-                String[] newParameters=new String[parameters.length-1];
-                System.arraycopy(parameters, 1, newParameters,0,newParameters.length);
-                list.add(newParameters);                
+            // If a delimiter is provided, verify that the delimiter exists in the line.
+            if (delimiter!=null) {
+                verifyLineContainsDelimiter(line,delimiter,lineNumber);          
+                String[] lineValues=line.split(delimiter);      
+
+                if (ignoreFirstColumn) {
+                    String[] newParameters=new String[lineValues.length-1];
+                    System.arraycopy(lineValues, 1, newParameters,0,newParameters.length);
+                    linesList.add(newParameters);                
+                }
+                else{
+                    linesList.add(lineValues);
+                }
             }
             else{
-                list.add(parameters);
+                Object[] lineValue=new Object[]{line};
+                linesList.add(lineValue);
             }
         }
         scanner.close();
         
-        if (list.size()<=0) {
+        if (linesList.size()<=0) {
             return null;
         }
-        Object[][] matrix=convertListToMatrix(list);
+        Object[][] matrix=convertListToMatrix(linesList);
         return matrix;
     }
     
